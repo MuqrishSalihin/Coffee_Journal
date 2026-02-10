@@ -5,6 +5,7 @@ import CoffeeForm from './components/CoffeeForm';
 import CoffeeDetail from './components/CoffeeDetail';
 import SearchAndFilter from './components/SearchandFilter'; 
 import StatsDashboard from './components/StatsDashboard';
+import Navbar from './components/Navbar';
 
 
 const API_URL = 'http://localhost:8080';
@@ -16,6 +17,8 @@ function App() {
   const [editingCoffee, setEditingCoffee] = useState(null);
   const [selectedCoffee, setSelectedCoffee] = useState(null);
   
+
+  const [activeView, setActiveView] = useState('coffees'); 
 
   const [filters, setFilters] = useState({
     searchTerm: '',
@@ -153,83 +156,94 @@ function App() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <h1 className="text-5xl font-bold text-center text-gray-800 mb-8">
-          ☕ Coffee Journal
-        </h1>
+ return (
+  <div className="min-h-screen bg-gray-50">
+    {/* Add Navbar */}
+    <Navbar 
+      activeView={activeView} 
+      setActiveView={setActiveView}
+      onAddCoffee={() => setShowForm(true)}
+    />
 
-        <StatsDashboard/>
-        
-        {!showForm && !editingCoffee && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="mb-6 px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg shadow-md transition-all hover:scale-105"
-          >
-            ➕ Add New Coffee
-          </button>
-        )}
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      {/* Show Stats Dashboard only when activeView is 'stats' */}
+      {activeView === 'stats' && <StatsDashboard />}
 
-        {showForm && (
-          <CoffeeForm
-            onSubmit={handleCreate}
-            onCancel={() => setShowForm(false)}
-          />
-        )}
+      {/* Show Coffee List when activeView is 'coffees' */}
+      {activeView === 'coffees' && (
+        <>
 
-        {editingCoffee && (
-          <CoffeeForm
-            onSubmit={handleUpdate}
-            onCancel={() => setEditingCoffee(null)}
-            initialData={editingCoffee}
-          />
-        )}
+          {showForm && (
+            <CoffeeForm
+              onSubmit={handleCreate}
+              onCancel={() => setShowForm(false)}
+            />
+          )}
 
-        {/* Search and Filter */}
-        {!showForm && !editingCoffee && (
-          <SearchAndFilter
-            onSearchChange={handleSearchChange}
-            onFilterChange={handleFilterChange}
-            filters={filters}
-          />
-        )}
+          {editingCoffee && (
+            <CoffeeForm
+              onSubmit={handleUpdate}
+              onCancel={() => setEditingCoffee(null)}
+              initialData={editingCoffee}
+            />
+          )}
 
-        {loading ? (
-          <div className="text-center text-xl text-gray-600">Loading coffees...</div>
-        ) : (
-          <>
-            <h2 className="text-3xl font-semibold text-gray-800 mb-4">
-              My Coffees ({filteredCoffees.length})
-              {filteredCoffees.length !==coffees.length && (
-                <span className="text-lg text-gray-500 ml-2">
-                  (filtered from {coffees.length})
-                </span>
+          {/* Search and Filter */}
+          {!showForm && !editingCoffee && (
+            <SearchAndFilter
+              onSearchChange={handleSearchChange}
+              onFilterChange={handleFilterChange}
+              filters={filters}
+            />
+          )}
+
+          {loading ? (
+            <div className="text-center text-xl text-gray-600">Loading coffees...</div>
+          ) : (
+            <>
+              <h2 className="text-3xl font-semibold text-gray-800 mb-4">
+                My Coffees ({filteredCoffees.length})
+                {filteredCoffees.length !== coffees.length && (
+                  <span className="text-lg text-gray-500 ml-2">
+                    (filtered from {coffees.length})
+                  </span>
+                )}
+              </h2>
+
+              {filteredCoffees.length === 0 ? (
+                <p className="text-gray-600 text-center py-8">
+                  No coffees match your filters. Try adjusting your search!
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {filteredCoffees.map(coffee => (
+                    <CoffeeCard
+                      key={coffee.id}
+                      coffee={coffee}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                      onViewDetails={handleViewDetails}
+                    />
+                  ))}
+                </div>
               )}
-            </h2>
+            </>
+          )}
+        </>
+      )}
 
-            {filteredCoffees.length === 0 ? (
-              <p className="text-gray-600 text-center py-8">
-                No coffees match your filters. Try adjusting your search!
-              </p>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {filteredCoffees.map(coffee => (
-                  <CoffeeCard
-                    key={coffee.id}
-                    coffee={coffee}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onViewDetails={handleViewDetails}
-                  />
-                ))}
-              </div>
-            )}
-          </>
-        )}
-      </div>
+      {/* Home view (optional - you can add content here later) */}
+      {activeView === 'home' && (
+        <div>
+          <h1 className="text-4xl font-bold text-gray-800 mb-8">
+            Welcome to Your Coffee Journal
+          </h1>
+          {/* Add welcome content here */}
+        </div>
+      )}
     </div>
-  );
+  </div>
+);
 }
 
 export default App;

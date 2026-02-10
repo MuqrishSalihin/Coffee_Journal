@@ -9,3 +9,15 @@ export default {
   },
   plugins: [],
 }
+
+module.exports = {
+  theme: {
+    extend: {
+      fontFamily: {
+        'typewriter': ['Special Elite', 'Courier New', 'monospace'],
+        // or
+        'typewriter': ['Courier Prime', 'Courier New', 'monospace'],
+      }
+    }
+  }
+}
