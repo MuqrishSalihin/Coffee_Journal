@@ -44,8 +44,8 @@ dependencies {
 
 // Shadow JAR configuration
 tasks.shadowJar {
-    archiveBaseName.set("coffee-journal")
-    archiveClassifier.set("")
+    archiveBaseName.set("Coffee_Journal")
+    archiveClassifier.set("all")
     archiveVersion.set("")
     manifest {
         attributes["Main-Class"] = "io.ktor.server.netty.EngineMain"
