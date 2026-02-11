@@ -7,7 +7,6 @@ plugins {
     kotlin("jvm") version "2.3.0"
     id("io.ktor.plugin") version "3.4.0"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.3.0"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "com.example"
@@ -43,15 +42,12 @@ dependencies {
 }
 
 // Shadow JAR configuration
-tasks.shadowJar {
-    archiveBaseName.set("Coffee_Journal")
-    archiveClassifier.set("all")
-    archiveVersion.set("")
-    manifest {
-        attributes["Main-Class"] = "io.ktor.server.netty.EngineMain"
+// Ktor plugin handles shadowJar automatically, just configure the name
+ktor {
+    fatJar {
+        archiveFileName.set("Coffee_Journal-all.jar")
     }
 }
-
 // Make build task depend on shadowJar
 tasks.build {
     dependsOn(tasks.shadowJar)
