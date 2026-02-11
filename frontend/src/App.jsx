@@ -3,9 +3,10 @@ import axios from 'axios';
 import CoffeeCard from './components/CoffeeCard';
 import CoffeeForm from './components/CoffeeForm';
 import CoffeeDetail from './components/CoffeeDetail';
-import SearchAndFilter from './components/SearchandFilter'; 
 import StatsDashboard from './components/StatsDashboard';
 import Navbar from './components/Navbar';
+import CoffeeActionBar from './components/Coffeeactionbar';
+import FilterSidebar from './components/FilterSidebar';
 
 
 const API_URL = 'http://localhost:8080';
@@ -16,6 +17,7 @@ function App() {
   const [showForm, setShowForm] = useState(false);
   const [editingCoffee, setEditingCoffee] = useState(null);
   const [selectedCoffee, setSelectedCoffee] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
   
 
   const [activeView, setActiveView] = useState('coffees'); 
@@ -53,6 +55,11 @@ function App() {
       console.error('Error creating coffee:', error);
       alert('Failed to add coffee');
     }
+  };
+
+  const handleAddCoffee = () => {
+    setShowForm(true)
+    window.scrollTo({top : 0, behavior: 'smooth'})
   };
 
   const handleUpdate = async (coffeeData) => {
@@ -158,20 +165,26 @@ function App() {
 
  return (
   <div className="min-h-screen bg-gray-50">
-    {/* Add Navbar */}
+    {/* Navbar */}
     <Navbar 
       activeView={activeView} 
       setActiveView={setActiveView}
-      onAddCoffee={() => setShowForm(true)}
     />
 
     <div className="max-w-6xl mx-auto px-4 py-8">
       {/* Show Stats Dashboard only when activeView is 'stats' */}
-      {activeView === 'stats' && <StatsDashboard />}
+      {activeView === 'stats' && <StatsDashboard coffees = {coffees} />}
 
       {/* Show Coffee List when activeView is 'coffees' */}
       {activeView === 'coffees' && (
         <>
+
+        {/* Floating navbar on coffee page */}
+        <CoffeeActionBar
+            onAddCoffee={handleAddCoffee}
+            onToggleFilters={() => setShowFilters(!showFilters)}
+            showFilters={showFilters}
+          />
 
           {showForm && (
             <CoffeeForm
@@ -189,13 +202,13 @@ function App() {
           )}
 
           {/* Search and Filter */}
-          {!showForm && !editingCoffee && (
-            <SearchAndFilter
-              onSearchChange={handleSearchChange}
-              onFilterChange={handleFilterChange}
-              filters={filters}
-            />
-          )}
+          <FilterSidebar
+            isOpen={showFilters}
+            onClose={() => setShowFilters(false)}
+            filters={filters}
+            onSearchChange={handleSearchChange}
+            onFilterChange={handleFilterChange}
+          />
 
           {loading ? (
             <div className="text-center text-xl text-gray-600">Loading coffees...</div>

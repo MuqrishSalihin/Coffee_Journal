@@ -45,15 +45,6 @@ const Navbar = ({ activeView, setActiveView, onAddCoffee }) => {
               STATS
             </button>
           </div>
-
-          {/* Add Coffee Button */}
-          <button
-            onClick={onAddCoffee}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            <PlusCircle size={18} />
-            ADD COFFEE
-          </button>
         </div>
       </div>
     </nav>
