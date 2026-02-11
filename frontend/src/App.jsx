@@ -9,7 +9,7 @@ import CoffeeActionBar from './components/Coffeeactionbar';
 import FilterSidebar from './components/FilterSidebar';
 
 
-const API_URL = 'http://localhost:8080';
+const API_URL = 'https://coffeejournal-production.up.railway.app';
 
 function App() {
   const [coffees, setCoffees] = useState([]);
