@@ -23,7 +23,8 @@ fun Application.configureHTTP() {
         allowMethod(HttpMethod.Patch)
         allowHeader(HttpHeaders.Authorization)
         allowHeader("MyCustomHeader")
-        anyHost() // @TODO: Don't do this in production if possible. Try to limit it.
+        allowHost("coffee-journal-virid.vercel.app", schemes = listOf("https"))
+        allowHost("localhost:5173") // Keep for local development
     }
     install(DefaultHeaders) {
         header("X-Engine", "Ktor") // will send this header with each response
