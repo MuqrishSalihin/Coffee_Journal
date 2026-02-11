@@ -1,0 +1,31 @@
+# Build outputs
+build/
+.gradle/
+out/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+
+# Git
+.git/
+.gitignore
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node modules (if you have frontend in same repo)
+node_modules/
+
+# Environment files
+.env
+.env.local
+
+# Database files (don't copy local DB to container)
+*.db
+*.sqlite

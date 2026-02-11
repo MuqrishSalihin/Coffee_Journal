@@ -40,3 +40,18 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     implementation("org.xerial:sqlite-jdbc:3.44.1.0")
 }
+
+// Shadow JAR configuration
+tasks.shadowJar {
+    archiveBaseName.set("coffee-journal")
+    archiveClassifier.set("")
+    archiveVersion.set("")
+    manifest {
+        attributes["Main-Class"] = "io.ktor.server.netty.EngineMain"
+    }
+}
+
+// Make build task depend on shadowJar
+tasks.build {
+    dependsOn(tasks.shadowJar)
+}
