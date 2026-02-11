@@ -21,8 +21,8 @@ function StatsDashboard() {
   const fetchStats = async () => {
     try {
       const[statsResponse, coffeesResponse] = await Promise.all([
-        axios.get('http://localhost:8080/statistics'),
-        axios.get('http://localhost:8080/coffees')
+        axios.get(`${API_URL}/statistics`),
+        axios.get(`${API_URL}/coffees`)
       ]);
       setStats(statsResponse.data);
       setCoffees(coffeesResponse.data)

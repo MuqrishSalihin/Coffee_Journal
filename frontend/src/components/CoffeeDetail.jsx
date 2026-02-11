@@ -15,7 +15,7 @@ function CoffeeDetail({ coffee, onBack }) {
 
   const fetchBrewMethods = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/coffees/${coffee.id}/brew-methods`);
+      const response = await axios.get(`${API_URL}/coffees/${coffee.id}/brew-methods`);
       setBrewMethods(response.data);
       setLoading(false);
     } catch (error) {
@@ -26,7 +26,7 @@ function CoffeeDetail({ coffee, onBack }) {
 
   const handleCreateBrew = async (brewData) => {
     try {
-      await axios.post('http://localhost:8080/brew-methods', brewData);
+      await axios.post(`${API_URL}/brew-methods`, brewData);
       fetchBrewMethods();
       setShowForm(false);
       alert('Brew session logged!');
@@ -38,7 +38,7 @@ function CoffeeDetail({ coffee, onBack }) {
 
   const handleUpdateBrew = async (brewData) => {
     try {
-      await axios.put(`http://localhost:8080/brew-methods/${editingBrew.id}`, brewData);
+      await axios.put(`${API_URL}/brew-methods/${editingBrew.id}`, brewData);
       fetchBrewMethods();
       setEditingBrew(null);
       alert('Brew session updated!');
@@ -51,7 +51,7 @@ function CoffeeDetail({ coffee, onBack }) {
   const handleDeleteBrew = async (id) => {
     if (window.confirm('Delete this brew session?')) {
       try {
-        await axios.delete(`http://localhost:8080/brew-methods/${id}`);
+        await axios.delete(`${API_URL}/brew-methods/${id}`);
         fetchBrewMethods();
         alert('Brew session deleted!');
       } catch (error) {
