@@ -3,6 +3,8 @@ import axios from 'axios';
 import BrewMethodCard from './BrewMethodCard';
 import BrewMethodForm from './BrewMethodForm';
 
+const API_URL = 'https://coffeejournal-production.up.railway.app';
+
 function CoffeeDetail({ coffee, onBack }) {
   const [brewMethods, setBrewMethods] = useState([]);
   const [loading, setLoading] = useState(true);

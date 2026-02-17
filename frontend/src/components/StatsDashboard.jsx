@@ -9,6 +9,8 @@ import {
 } from 'react-icons/gi';
 import CoffeeCharts from './CoffeeCharts';
 
+const API_URL = 'https://coffeejournal-production.up.railway.app';
+
 function StatsDashboard() {
   const [stats, setStats] = useState(null);
   const [coffees, setCoffees] = useState([]);
