@@ -9,13 +9,18 @@ import org.jetbrains.exposed.sql.*
 
 fun Application.configureDatabases() {
     val rawUrl = System.getenv("DATABASE_URL")
-        ?: "jdbc:postgresql://localhost:5432/coffeejournal"
+    println("=== DATABASE_URL env var: $rawUrl ===")
 
-    val jdbcUrl = if (rawUrl.startsWith("jdbc:")) {
+    val jdbcUrl = if (rawUrl == null) {
+        println("=== WARNING: DATABASE_URL is null, using localhost fallback ===")
+        "jdbc:postgresql://localhost:5432/coffeejournal"
+    } else if (rawUrl.startsWith("jdbc:")) {
         rawUrl
     } else {
         "jdbc:$rawUrl"
     }
+
+    println("=== Connecting to: $jdbcUrl ===")
 
     val database = Database.connect(
         url = jdbcUrl,
