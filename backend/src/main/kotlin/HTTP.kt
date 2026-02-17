@@ -18,13 +18,15 @@ import org.slf4j.event.*
 fun Application.configureHTTP() {
     install(CORS) {
         allowMethod(HttpMethod.Options)
+        allowMethod(HttpMethod.Get)
+        allowMethod(HttpMethod.Post)
         allowMethod(HttpMethod.Put)
         allowMethod(HttpMethod.Delete)
         allowMethod(HttpMethod.Patch)
         allowHeader(HttpHeaders.Authorization)
-        allowHeader("MyCustomHeader")
+        allowHeader(HttpHeaders.ContentType)
         allowHost("coffee-journal-virid.vercel.app", schemes = listOf("https"))
-        allowHost("localhost:5173") // Keep for local development
+        allowHost("localhost:5173", schemes = listOf("http")) // Keep for local development
     }
     install(DefaultHeaders) {
         header("X-Engine", "Ktor") // will send this header with each response
