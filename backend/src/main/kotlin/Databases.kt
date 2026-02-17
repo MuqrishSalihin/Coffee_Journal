@@ -11,10 +11,10 @@ fun Application.configureDatabases() {
     val rawUrl = System.getenv("DATABASE_URL")
         ?: "jdbc:postgresql://localhost:5432/coffeejournal"
 
-    val jdbcUrl = if (rawUrl.startsWith("postgresql://")) {
-        "jdbc:$rawUrl"
-    } else {
+    val jdbcUrl = if (rawUrl.startsWith("jdbc:")) {
         rawUrl
+    } else {
+        "jdbc:$rawUrl"
     }
 
     val database = Database.connect(
