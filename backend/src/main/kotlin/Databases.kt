@@ -6,14 +6,22 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.jetbrains.exposed.sql.*
-import java.io.File
 
 fun Application.configureDatabases() {
-    File("/app/data").mkdirs()
+    val rawUrl = System.getenv("DATABASE_URL")
+        ?: "jdbc:postgresql://localhost:5432/coffeejournal"
+
+    val jdbcUrl = if (rawUrl.startsWith("postgresql://")) {
+        "jdbc:$rawUrl"
+    } else {
+        rawUrl
+    }
+
     val database = Database.connect(
-        url = "jdbc:sqlite:/app/data/coffee-journal.db",
-        driver = "org.sqlite.JDBC"
+        url = jdbcUrl,
+        driver = "org.postgresql.Driver"
     )
+
 
     val coffeeService = Coffee_Services(database)
     val brewMethodService = BrewMethodsServices(database)
