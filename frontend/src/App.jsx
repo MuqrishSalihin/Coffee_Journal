@@ -7,6 +7,7 @@ import StatsDashboard from './components/StatsDashboard';
 import Navbar from './components/Navbar';
 import CoffeeActionBar from './components/Coffeeactionbar';
 import FilterSidebar from './components/FilterSidebar';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 
 
 const API_URL = 'https://coffeejournal-production.up.railway.app';
@@ -18,10 +19,7 @@ function App() {
   const [editingCoffee, setEditingCoffee] = useState(null);
   const [selectedCoffee, setSelectedCoffee] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
-  
-
   const [activeView, setActiveView] = useState('coffees'); 
-
   const [filters, setFilters] = useState({
     searchTerm: '',
     origin: '',
@@ -29,7 +27,17 @@ function App() {
     minRating: '',
     sortBy: 'name'
   });
+  const[coffeeToDelete, setCoffeeToDelete] = useState(null);
+  const [toast, setToast] = useState(null);
 
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 3000);
+  };  
+  
   const fetchCoffees = async () => {
     try {
       const response = await axios.get(`${API_URL}/coffees`);
@@ -45,32 +53,26 @@ function App() {
     fetchCoffees();
   }, []);
 
-  const handleCreate = async (coffeeData) => {
+  const handleAddCoffee = async (coffeeData) => {
     try {
       await axios.post(`${API_URL}/coffees`, coffeeData);
       fetchCoffees();
       setShowForm(false);
-      alert('Coffee added successfully!');
+      showToast('Coffee added successfully ✓');
     } catch (error) {
-      console.error('Error creating coffee:', error);
-      alert('Failed to add coffee');
+      showToast('Failed to add coffee', 'error');
     }
   };
-
-  const handleAddCoffee = () => {
-    setShowForm(true)
-    window.scrollTo({top : 0, behavior: 'smooth'})
-  };
-
+     
   const handleUpdate = async (coffeeData) => {
     try {
       await axios.put(`${API_URL}/coffees/${editingCoffee.id}`, coffeeData);
       fetchCoffees();
       setEditingCoffee(null);
-      alert('Coffee updated successfully!');
+      showToast('Coffee updated successfully ✓');
     } catch (error) {
       console.error('Error updating coffee:', error);
-      alert('Failed to update coffee');
+      showToast('Failed to update coffee', 'error');
     }
   };
 
@@ -79,10 +81,10 @@ function App() {
       try {
         await axios.delete(`${API_URL}/coffees/${id}`);
         fetchCoffees();
-        alert('Coffee deleted successfully!');
+        showToast('Coffee deleted successfully ☕')
       } catch (error) {
         console.error('Error deleting coffee:', error);
-        alert('Failed to delete coffee');
+        showToast('Failed to delete coffee', 'error')
       }
     }
   };
@@ -188,7 +190,7 @@ function App() {
 
           {showForm && (
             <CoffeeForm
-              onSubmit={handleCreate}
+              onSubmit={handleAddCoffee}
               onCancel={() => setShowForm(false)}
             />
           )}
@@ -209,6 +211,34 @@ function App() {
             onSearchChange={handleSearchChange}
             onFilterChange={handleFilterChange}
           />
+
+          {/* Toast */}
+          {toast && (
+            <div className={`fixed bottom-6 right-6 px-4 py-3 rounded-lg shadow-lg text-white z-50 transition-all
+              ${toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'}`}>
+              {toast.message}
+            </div>
+          )}
+
+          {/* Confirm Dialog */}
+          <AlertDialog open={coffeeToDelete !== null} onOpenChange={() => setCoffeeToDelete(null)}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete this coffee?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete this coffee and all its brew sessions. This cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction 
+                  className="bg-red-600 hover:bg-red-700"
+                  onClick={() => handleDelete(coffeeToDelete)}>
+                  Yes, delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           {loading ? (
             <div className="text-center text-xl text-gray-600">Loading coffees...</div>
@@ -234,7 +264,7 @@ function App() {
                       key={coffee.id}
                       coffee={coffee}
                       onEdit={handleEdit}
-                      onDelete={handleDelete}
+                      onDelete={id => setCoffeeToDelete(id)}
                       onViewDetails={handleViewDetails}
                     />
                   ))}
