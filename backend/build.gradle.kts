@@ -40,15 +40,3 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     implementation("org.xerial:sqlite-jdbc:3.44.1.0")
 }
-
-// Shadow JAR configuration
-// Ktor plugin handles shadowJar automatically, just configure the name
-ktor {
-    fatJar {
-        archiveFileName.set("Coffee_Journal-all.jar")
-    }
-}
-// Make build task depend on shadowJar
-tasks.build {
-    dependsOn(tasks.shadowJar)
-}
