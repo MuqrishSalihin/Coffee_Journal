@@ -132,6 +132,7 @@ class Coffee_Services(private val database: Database) {
     //DELETE - delete Coffee entry
 
     suspend fun deleteCoffee (id: Int): Int = dbQuery {
+        BrewMethodsServices.BrewMethods.deleteWhere { BrewMethodsServices.BrewMethods.coffeeId eq id }
         Coffee_Entries.deleteWhere { Coffee_Entries.id eq id }
     }
 
