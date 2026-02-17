@@ -40,3 +40,9 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     implementation("org.xerial:sqlite-jdbc:3.44.1.0")
 }
+
+ktor {
+    fatJar {
+        archiveFileName.set("Coffee_Journal-all.jar")
+    }
+}
