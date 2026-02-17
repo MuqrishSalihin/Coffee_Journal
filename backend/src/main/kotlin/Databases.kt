@@ -6,8 +6,10 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.jetbrains.exposed.sql.*
+import java.io.File
 
 fun Application.configureDatabases() {
+    File("/app/data").mkdirs()
     val database = Database.connect(
         url = "jdbc:sqlite:/app/data/coffee-journal.db",
         driver = "org.sqlite.JDBC"
