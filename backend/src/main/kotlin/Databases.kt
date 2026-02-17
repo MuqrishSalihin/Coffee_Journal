@@ -75,7 +75,7 @@ fun Application.configureDatabases() {
         }
 
         // Update user
-        put("/users/{id}") {
+        put("/coffees/{id}") {
             val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
             val coffee = call.receive<coffee>()
             val updatedCoffee = coffee.copy(id=id)
@@ -84,7 +84,7 @@ fun Application.configureDatabases() {
         }
 
         // Delete user
-        delete("/users/{id}") {
+        delete("/coffees/{id}") {
             val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
             coffeeService.deleteCoffee( id)
             call.respond(HttpStatusCode.OK, mapOf("message" to "Coffee deleted"))
