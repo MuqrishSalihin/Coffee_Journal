@@ -11,20 +11,30 @@ fun Application.configureDatabases() {
     val rawUrl = System.getenv("DATABASE_URL")
     println("=== DATABASE_URL env var: $rawUrl ===")
 
-    val jdbcUrl = if (rawUrl == null) {
-        println("=== WARNING: DATABASE_URL is null, using localhost fallback ===")
-        "jdbc:postgresql://localhost:5432/coffeejournal"
-    } else if (rawUrl.startsWith("jdbc:")) {
-        rawUrl
+    val jdbcUrl: String
+    val username: String
+    val password: String
+
+    if (rawUrl == null) {
+        jdbcUrl = "jdbc:postgresql://localhost:5432/coffeejournal"
+        username = "postgres"
+        password = ""
     } else {
-        "jdbc:$rawUrl"
+        // Parse: postgresql://user:password@host:port/dbname
+        val uri = java.net.URI(rawUrl)
+        val userInfo = uri.userInfo.split(":")
+        username = userInfo[0]
+        password = userInfo[1]
+        jdbcUrl = "jdbc:postgresql://${uri.host}:${uri.port}${uri.path}"
     }
 
-    println("=== Connecting to: $jdbcUrl ===")
+    println("=== Connecting to: $jdbcUrl as $username ===")
 
     val database = Database.connect(
         url = jdbcUrl,
-        driver = "org.postgresql.Driver"
+        driver = "org.postgresql.Driver",
+        user = username,
+        password = password
     )
 
 
