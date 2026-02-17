@@ -9,7 +9,7 @@ import org.jetbrains.exposed.sql.*
 
 fun Application.configureDatabases() {
     val database = Database.connect(
-        url = "jdbc:sqlite:app/data/coffee-journal.db",
+        url = "jdbc:sqlite:/app/data/coffee-journal.db",
         driver = "org.sqlite.JDBC"
     )
 
