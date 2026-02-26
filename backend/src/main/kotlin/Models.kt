@@ -1,11 +1,13 @@
 package com.example
 
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.mindrot.jbcrypt.BCrypt
 
 
 //---------------------------------------------------
@@ -17,6 +19,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 data class coffee(
     val id : Int? = null,
     val name : String,
+    val userId: Int?= null,
     val origin : String? = null,
     val roaster : String? = null,
     val roastLevel : String?=null,
@@ -51,6 +54,85 @@ data class Statistics(
     val favouriteBrewMethod: Int?
 )
 
+
+@Serializable
+
+data class UserRegisterRequest(
+    val username: String,
+    val email: String,
+    val password: String
+)
+
+@Serializable
+
+data class UserLoginRequest(
+    val login: String, //user can login via email/username
+    val password: String
+)
+
+@Serializable
+
+data class UserResponse(
+    val id: Int,
+    val username: String,
+    val email: String
+)
+
+
+//------------------------------------
+// USER OPERATIONS AND TABLE
+//------------------------------------
+
+
+class UserService(private val database: Database) {
+
+    object Users: Table("Users") {
+        val id = integer("id"). autoIncrement()
+        val username = varchar("username", 100 ).uniqueIndex()
+        val email = varchar("email", 255).uniqueIndex()
+        val passwordHash = varchar("passwordHash", 255)
+        val createdAt = text("createdAt")
+        override val primaryKey = PrimaryKey(id)
+    }
+
+    init {
+        transaction(database) {
+            SchemaUtils.create(Users)
+        }
+    }
+
+    suspend fun register(request: UserRegisterRequest): UserResponse? = dbQuery {
+
+        val existing = Users.selectAll().where {Users.email eq request.email }.singleOrNull()
+        if (existing != null) return@dbQuery null
+
+        val hash = BCrypt.hashpw(request.password, BCrypt.gensalt())
+        val id = Users.insert {
+            it[username] = request.username
+            it[email] = request.email
+            it[passwordHash] = hash
+            it[createdAt] = java.time.Instant.now().toString()
+        } [Users.id]
+
+        UserResponse(id, request.username, request.email)
+    }
+
+    suspend fun login (request: UserLoginRequest) : UserResponse? = dbQuery {
+        val user = Users.selectAll().where { (Users.email eq request.login) or (Users.username eq request.login) }
+            .singleOrNull()
+            ?: return@dbQuery null
+
+        val valid = BCrypt.checkpw(request.password, user[Users.passwordHash])
+        if (!valid) return@dbQuery null
+
+        UserResponse(user[Users.id], user[Users.username], user[Users.email])
+    }
+
+
+    private suspend fun <T> dbQuery(block: suspend () -> T): T =
+        newSuspendedTransaction(Dispatchers.IO) { block() }
+}
+
 //------------------------------------
 //CRUD OPERATIONS FOR COFFEE SERVICES
 //-------------------------------------
@@ -59,6 +141,7 @@ class Coffee_Services(private val database: Database) {
     object Coffee_Entries: Table("Coffees") {
 
         val id = integer("id").autoIncrement()
+        val userId = integer("user_id").references(UserService.Users.id)
         val name =varchar("name", 255)
         val origin = varchar("origin", 255)
         val roaster = varchar("roaster", 255).nullable()
@@ -85,6 +168,7 @@ class Coffee_Services(private val database: Database) {
     suspend fun insertCoffeeEntries(coffeeEntries: coffee): Int = dbQuery {
         Coffee_Entries.insert {
             it[name] = coffeeEntries.name
+            it[userId] = coffeeEntries.userId ?: throw IllegalArgumentException("userId required")
             it[origin] = coffeeEntries.origin ?: ""
             it[roaster] = coffeeEntries.roaster
             it[roastLevel] = coffeeEntries.roastLevel ?: ""
@@ -108,8 +192,9 @@ class Coffee_Services(private val database: Database) {
 
 
     //GET ALL COFFEE by returning a list of all of it
-    suspend fun getAllCoffee(): List<coffee> = dbQuery {
+    suspend fun getAllCoffee(userId: Int): List<coffee> = dbQuery {
         Coffee_Entries.selectAll()
+            .where { Coffee_Entries.userId eq userId }
             .map { rowToCoffee(it) }
     }
 
@@ -145,7 +230,7 @@ class Coffee_Services(private val database: Database) {
         origin = row[Coffee_Entries.origin],
         roaster = row[Coffee_Entries.roaster],
         roastLevel = row[Coffee_Entries.roastLevel],
-        roastDate = row[Coffee_Entries.purchaseDate],
+        roastDate = row[Coffee_Entries.roastDate],
         purchasedate = row[Coffee_Entries.purchaseDate],
         price = row[Coffee_Entries.price],
         rating = row[Coffee_Entries.rating],
@@ -324,5 +409,8 @@ class StatisticsServices(private val database: Database) {
     private suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
 }
+
+
+
 
 

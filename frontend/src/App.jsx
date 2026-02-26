@@ -183,7 +183,7 @@ function App() {
 
         {/* Floating navbar on coffee page */}
         <CoffeeActionBar
-            onAddCoffee={handleAddCoffee}
+            onAddCoffee={() => setShowForm(true)}
             onToggleFilters={() => setShowFilters(!showFilters)}
             showFilters={showFilters}
           />
@@ -222,24 +222,27 @@ function App() {
 
           {/* Confirm Dialog */}
           <AlertDialog open={coffeeToDelete !== null} onOpenChange={() => setCoffeeToDelete(null)}>
-            <AlertDialogContent>
+            <AlertDialogContent className="max-w-md rounded-xl p-6">
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete this coffee?</AlertDialogTitle>
-                <AlertDialogDescription>
+                <AlertDialogTitle className="text-xl font-bold text-gray-900">
+                  Delete this coffee?
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-gray-500 mt-2">
                   This will permanently delete this coffee and all its brew sessions. This cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction 
-                  className="bg-red-600 hover:bg-red-700"
+              <AlertDialogFooter className="flex flex-row gap-3 mt-6">
+                <AlertDialogCancel className="flex-1 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50">
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  className="flex-1 rounded-lg bg-red-600 hover:bg-red-700 text-white"
                   onClick={() => handleDelete(coffeeToDelete)}>
                   Yes, delete
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-
           {loading ? (
             <div className="text-center text-xl text-gray-600">Loading coffees...</div>
           ) : (

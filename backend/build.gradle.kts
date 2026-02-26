@@ -39,6 +39,9 @@ dependencies {
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     implementation("org.postgresql:postgresql:42.7.2")
+    implementation("org.mindrot:jbcrypt:0.4")
+    implementation("com.auth0:java-jwt:4.4.0")
+
 }
 
 ktor {

@@ -41,9 +41,37 @@ fun Application.configureDatabases() {
     val coffeeService = Coffee_Services(database)
     val brewMethodService = BrewMethodsServices(database)
     val statisticsService = StatisticsServices(database)
+    val userService = UserService(database)
 
 
     routing {
+
+
+        //---------------------------------
+        // MULTIUSER API ROUTING
+        //---------------------------------
+
+        post("/auth/register") {
+            val request = call.receive<UserRegisterRequest>()
+            val user = userService.register(request)
+            if (user != null) {
+                call.respond(HttpStatusCode.Created, user)
+            } else {
+                call.respond(HttpStatusCode.Conflict, mapOf("error" to "Email already in use"))
+            }
+        }
+
+        post("/auth/login") {
+            val request = call.receive<UserLoginRequest>()
+            val user = userService.login(request)
+            if (user != null) {
+                val token = JwtConfig.generateToken(user.id, user.username)
+                call.respond(HttpStatusCode.OK, mapOf("token" to token, "user" to user))
+            } else {
+                call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Invalid credentials"))
+            }
+        }
+
 
         //---------------------------------
         // COFFEE API ROUTING
@@ -59,7 +87,10 @@ fun Application.configureDatabases() {
         //Get all coffees
 
         get("/coffees") {
-            val coffees = coffeeService.getAllCoffee()
+            val userId = JwtConfig.extractUserId(call)
+                ?: return@get call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Not authenticated"))
+
+            val coffees = coffeeService.getAllCoffee(userId)
             call.respond(HttpStatusCode.OK, coffees)
         }
 
