@@ -79,8 +79,10 @@ fun Application.configureDatabases() {
 
         // Create user
         post("/coffees") {
+            val userId = JwtConfig.extractUserId(call)
+                ?: return@post call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Not authenticated"))
             val coffee = call.receive<coffee>()
-            val id = coffeeService.insertCoffeeEntries(coffee)
+            val id = coffeeService.insertCoffeeEntries(coffee.copy(userId = userId))
             call.respond(HttpStatusCode.Created, mapOf("id" to id))
         }
 
@@ -89,15 +91,16 @@ fun Application.configureDatabases() {
         get("/coffees") {
             val userId = JwtConfig.extractUserId(call)
                 ?: return@get call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Not authenticated"))
-
             val coffees = coffeeService.getAllCoffee(userId)
             call.respond(HttpStatusCode.OK, coffees)
         }
 
         // Get a specific coffee by ID
         get("/coffees/{id}") {
+            val userId = JwtConfig.extractUserId(call)
+                ?: return@get call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Not authenticated"))
             val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-            val coffee = coffeeService.getCoffee(id)
+            val coffee = coffeeService.getCoffee(id, userId)
             if (coffee != null) {
                 call.respond(HttpStatusCode.OK, coffee)
             } else {
@@ -107,17 +110,21 @@ fun Application.configureDatabases() {
 
         // Update user
         put("/coffees/{id}") {
+
+            val userId = JwtConfig.extractUserId(call)
+                ?: return@put call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Not authenticated"))
             val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
             val coffee = call.receive<coffee>()
-            val updatedCoffee = coffee.copy(id=id)
-            coffeeService.updateCoffee(updatedCoffee)
+            coffeeService.updateCoffee(coffee.copy(id=id), userId )
             call.respond(HttpStatusCode.OK)
         }
 
         // Delete user
         delete("/coffees/{id}") {
+            val userId = JwtConfig.extractUserId(call)
+                ?: return@delete call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Not authenticated"))
             val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-            coffeeService.deleteCoffee( id)
+            coffeeService.deleteCoffee(id, userId)
             call.respond(HttpStatusCode.OK, mapOf("message" to "Coffee deleted"))
         }
 
@@ -127,6 +134,8 @@ fun Application.configureDatabases() {
 
         // Create brew methods/sessions
         post("/brew-methods") {
+            val userId = JwtConfig.extractUserId(call)
+                ?: return@post call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Not authenticated"))
             val brewMethoding = call.receive<BrewMethod>()
             val id = brewMethodService.insertBrewMethod(brewMethoding)
             call.respond(HttpStatusCode.Created, mapOf("id" to id))

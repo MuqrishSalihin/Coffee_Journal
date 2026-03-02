@@ -183,9 +183,9 @@ class Coffee_Services(private val database: Database) {
 
     //GET ONE COFFEE BY ID
 
-    suspend fun getCoffee(id: Int): coffee? = dbQuery {
+    suspend fun getCoffee(id: Int, userId: Int): coffee? = dbQuery {
         Coffee_Entries.selectAll()
-            .where {Coffee_Entries.id eq id}
+            .where {(Coffee_Entries.id eq id) and (Coffee_Entries.userId eq userId) }
             .map {rowToCoffee(it)}
             .singleOrNull()
     }
@@ -199,8 +199,8 @@ class Coffee_Services(private val database: Database) {
     }
 
     //UPDATE - modify coffee update
-    suspend fun updateCoffee(coffee: coffee): Int = dbQuery {
-        Coffee_Entries.update({ Coffee_Entries.id eq coffee.id!!}) {
+    suspend fun updateCoffee(coffee: coffee, userId: Int): Int = dbQuery {
+        Coffee_Entries.update({ (Coffee_Entries.id eq coffee.id!!) and (Coffee_Entries.userId eq userId) }) {
             it[name] = coffee.name
             it[origin] = coffee.origin ?: ""
             it[roaster] = coffee.roaster
@@ -216,9 +216,9 @@ class Coffee_Services(private val database: Database) {
 
     //DELETE - delete Coffee entry
 
-    suspend fun deleteCoffee (id: Int): Int = dbQuery {
+    suspend fun deleteCoffee (id: Int, userId: Int): Int = dbQuery {
         BrewMethodsServices.BrewMethods.deleteWhere { BrewMethodsServices.BrewMethods.coffeeId eq id }
-        Coffee_Entries.deleteWhere { Coffee_Entries.id eq id }
+        Coffee_Entries.deleteWhere { (Coffee_Entries.id eq id and (Coffee_Entries.userId eq userId) ) }
     }
 
     //HELPER: Convert database rows to coffee objects
@@ -271,7 +271,7 @@ class BrewMethodsServices(private val database: Database) {
 
     //CREATE - Insert brew method/session
 
-    suspend fun insertBrewMethod(session: BrewMethod): Int = dbQuery {
+    suspend fun insertBrewMethod(session: BrewMethod, userId: Int): Int = dbQuery {
         BrewMethods.insert {
             it[coffeeId] = session.coffeeId
             it[brewDate] = session.brewDate
